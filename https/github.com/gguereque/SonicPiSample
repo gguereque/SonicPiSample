@@ -1,0 +1,199 @@
+use_bpm 120
+cof = 0
+contSnare = 0
+contSt2 = 0
+trigger = false
+st1 = false
+st2 = false
+st3 = false
+st4 = false
+eMin = [:e4,:g4,:b4,:d5]
+gMin = [:e4,:g4,:a4,:d5]
+
+live_loop :arpeggpads do
+  with_synth :dpulse do
+    if trigger == false
+      play_pattern_timed(eMin,0.25,amp: 0.3, cutoff: cof)
+    else
+      firsSeq
+    end
+  end
+  live_loop :pads do
+    with_synth :dsaw do
+      if trigger == false
+        
+        if cof == 0
+          play_chord eMin, attack: 0.5, sustain: 1, release: 4, cutoff: cof
+          cof = cof + 10
+          puts cof
+        else
+          play_chord eMin, attack: 0.5, sustain: 1, release: 4, cutoff: cof
+          cof = cof + 10
+          puts cof
+          if cof >= 130
+            sleep 4
+            trigger = true
+            cof = 125
+          end
+        end
+        sleep 1
+      end
+      if trigger == true
+        4.times do
+          play_chord eMin, attack: 0.5, sustain: 1, release: 4, cutoff: cof
+          sleep 1
+        end
+        4.times do
+          play_chord gMin, attack: 0.5, sustain: 1, release: 4, cutoff: cof
+          sleep 1
+        end
+        
+      end
+      sleep 1
+    end
+  end
+  live_loop :kick do
+    if trigger == true
+      sample :bd_haus
+      if contSnare <= 64
+        contSnare = contSnare +1
+      end
+    end
+    sleep 1
+  end
+  live_loop :snarehats do
+    if trigger == true
+      sleep 1
+      sample  :drum_cymbal_hard
+    else
+      sleep 1
+    end
+  end
+  live_loop :hihats do
+    if trigger == true
+      sleep 0.5
+      sample :drum_cymbal_open
+      sleep 0.5
+    else
+      sleep 1
+    end
+  end
+  live_loop :snare do
+    with_fx :reverb do
+      if trigger == true
+        if contSnare >= 32
+          sleep 1
+          sample :drum_snare_hard
+          sleep 1
+        end
+      else
+        sleep 1
+      end
+    end
+  end
+  live_loop :closedhats do
+    if trigger == true
+      if contSnare >= 64
+        st1 = true
+      end
+      if contSnare >= 64
+        sample :drum_cymbal_closed, attack:0.00,release: 0.3
+        sleep 0.25
+      end
+    else
+      sleep 1
+    end
+  end
+  live_loop :fstStage do
+    if st1 == true
+      sample :ambi_lunar_land, amp: 3, pan: -0.5
+      if contSt2 <= 2
+        contSt2 = contSt2+1
+        puts contSt2
+      end
+      sleep 16
+    end
+    if contSt2 >= 2
+      st2 = true
+    end
+    
+  end
+  
+  live_loop :bass do
+    if trigger == true
+      with_synth :tb303 do
+        2.times do
+          8.times do
+            sleep 0.5
+            play :e1, amp: 2, release: 0.5, cutoff: 80
+            sleep 0.5
+          end
+          8.times do
+            sleep 0.5
+            play :d1, amp: 2, release: 0.5,cutoff: 80
+            sleep 0.5
+          end
+        end
+        2.times do
+          4.times do
+            sleep 0.5
+            play :e1, amp: 2, release: 0.5,cutoff: 80
+            sleep 0.5
+          end
+          2.times do
+            sleep 0.5
+            play :g1, amp: 2, release: 0.5,cutoff: 80
+            sleep 0.5
+          end
+          2.times do
+            sleep 0.5
+            play :a1, amp: 2, release: 0.5,cutoff: 80
+            sleep 0.5
+          end
+          8
+          4.times do
+            sleep 0.5
+            play :d1, amp: 2, release: 0.5,cutoff: 80
+            sleep 0.5
+          end
+          sleep 0.5
+          play :g1, release: 0.5
+          sleep 1
+          play :fs2, release: 0.5
+          sleep 1
+          play :e2, release: 0.5
+          sleep 1
+          play :d2, release: 0.5
+          sleep 0.5
+        end
+      end
+    end
+  end
+  
+  live_loop :leads do
+    use_synth :dark_ambience
+    if st2 == true
+      play :d6,attack: 0.2, sustain: 3, release: 0.5,amp: 2
+      sleep 4
+      play :a5,attack: 0.2, sustain: 3, release: 0.5,amp: 2
+      sleep 3
+      play :b5,attack: 0.2, sustain: 1, release: 0.5,amp: 2
+      sleep 1
+      play :a5,attack: 0.2, sustain: 3, release: 0.5,amp: 2
+      sleep 4
+      play :g5,attack: 0.2, sustain: 3, release: 0.5,amp: 2
+      sleep 4
+    end
+    
+  end
+  define :firsSeq do
+    4.times do
+      play_pattern_timed(eMin,0.25,amp: 0.3, cutoff: cof)
+      sleep 1
+    end
+    4.times do
+      play_pattern_timed(gMin,0.25,amp: 0.3, cutoff: cof)
+      sleep 1
+    end
+  end
+end
